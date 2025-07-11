@@ -8,7 +8,9 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
-//s
+
+import java.util.Iterator;
+
 public class Main extends Application {
     private Ball ball;
     private Paddle paddle;
@@ -23,6 +25,8 @@ public class Main extends Application {
         GraphicsItem.setCanvasWidth(canvas.getWidth());
         GraphicsItem.setCanvasHeight(canvas.getHeight());
 
+        canvas.loadLevel();
+
         paddle = new Paddle();
         canvas.setPaddle(paddle);
 
@@ -31,7 +35,6 @@ public class Main extends Application {
 
         System.out.println("Ball dimensions: " + ball.getWidth() + "x" + ball.getHeight());
         System.out.println("Ball position: " + ball.getX() + ", " + ball.getY());
-
 
         StackPane root = new StackPane();
         root.getChildren().add(canvas);
@@ -92,9 +95,10 @@ public class Main extends Application {
         ball.updatePosition();
 
         checkWallCollisions();
-
         checkPaddleCollision();
+        checkBrickCollisions(); // Nowa metoda!
 
+        // Reset piłki gdy spadnie na dół
         if (ball.getY() > canvas.getHeight()) {
             ball.setPosition(new Point2D(960, 540));
             double angle = Math.toRadians(45);
@@ -125,19 +129,52 @@ public class Main extends Application {
                 ball.getY() < paddle.getY() + paddle.getHeight() &&
                 ball.getY() + ball.getHeight() > paddle.getY()) {
 
-            ball.bounceVertical();
-
+            // Ustaw pozycję piłki nad paletką
             ball.setY(paddle.getY() - ball.getHeight());
 
+            // Oblicz pozycję uderzenia względem środka paletki
             double paddleCenter = paddle.getX() + paddle.getWidth() / 2;
             double ballCenter = ball.getX() + ball.getWidth() / 2;
             double hitPosition = (ballCenter - paddleCenter) / (paddle.getWidth() / 2);
 
-            hitPosition = Math.max(-1, Math.min(1, hitPosition));
+            // Używamy nowej metody bounceFromPaddle
+            ball.bounceFromPaddle(hitPosition);
+        }
+    }
 
-            double angle = hitPosition * Math.PI / 4;
-            Point2D newVector = new Point2D(Math.sin(angle), -Math.abs(Math.cos(angle)));
-            ball.setMoveVector(newVector);
+    // Nowa metoda sprawdzająca kolizje z cegłami
+    private void checkBrickCollisions() {
+        Iterator<Brick> brickIterator = canvas.getBricks().iterator();
+
+        while (brickIterator.hasNext()) {
+            Brick brick = brickIterator.next();
+
+            // Pobieramy skrajne punkty piłki
+            Point2D topPoint = ball.getTopPoint();
+            Point2D bottomPoint = ball.getBottomPoint();
+            Point2D leftPoint = ball.getLeftPoint();
+            Point2D rightPoint = ball.getRightPoint();
+
+            // Sprawdzamy kolizję
+            Brick.CrushType crushType = brick.checkCollision(topPoint, bottomPoint, leftPoint, rightPoint);
+
+            if (crushType != Brick.CrushType.NoCrush) {
+                // Usuwamy cegłę
+                brickIterator.remove();
+
+                // Odbijamy piłkę w odpowiednim kierunku
+                switch (crushType) {
+                    case HorizontalCrush:
+                        ball.bounceHorizontal();
+                        break;
+                    case VerticalCrush:
+                        ball.bounceVertical();
+                        break;
+                }
+
+                // Przerwij sprawdzanie po pierwszej kolizji
+                break;
+            }
         }
     }
 
