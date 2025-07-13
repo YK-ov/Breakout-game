@@ -7,6 +7,7 @@ import javafx.scene.paint.Paint;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class GameCanvas extends Canvas {
     private javafx.scene.canvas.GraphicsContext canvas;
@@ -60,6 +61,18 @@ public class GameCanvas extends Canvas {
         int rows = 20;
         int cols = 10;
 
+        int numberOfColors = 6;
+        Random random = new Random();
+
+        List<Color> rowColors = new ArrayList<>();
+        for (int i = 0; i < numberOfColors; i++) {
+            int r = random.nextInt(256);
+            int g = random.nextInt(256);
+            int b = random.nextInt(256);
+            rowColors.add(Color.rgb(r, g, b));
+        }
+
+        /*
         List<Color> rowColors = List.of(
                 Color.RED,
                 Color.ORANGE,
@@ -68,6 +81,7 @@ public class GameCanvas extends Canvas {
                 Color.AQUA,
                 Color.BEIGE
         );
+*/
 
         for (int row = 2; row <= 7; row++) {
             Color color = rowColors.get(row - 2);
