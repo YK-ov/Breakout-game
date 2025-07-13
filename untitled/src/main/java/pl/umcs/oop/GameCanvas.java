@@ -72,17 +72,6 @@ public class GameCanvas extends Canvas {
             rowColors.add(Color.rgb(r, g, b));
         }
 
-        /*
-        List<Color> rowColors = List.of(
-                Color.RED,
-                Color.ORANGE,
-                Color.PINK,
-                Color.AQUAMARINE,
-                Color.AQUA,
-                Color.BEIGE
-        );
-*/
-
         for (int row = 2; row <= 7; row++) {
             Color color = rowColors.get(row - 2);
             for (int col = 0; col < cols; col++) {
