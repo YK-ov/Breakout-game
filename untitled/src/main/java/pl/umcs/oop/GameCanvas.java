@@ -12,6 +12,7 @@ public class GameCanvas extends Canvas {
     private javafx.scene.canvas.GraphicsContext canvas;
     private Paddle paddle;
     private List<Brick> bricks = new ArrayList<>();
+    private HpSystem hpSystem;
 
     public GameCanvas(double width, double height) {
         super(width, height);
@@ -26,14 +27,20 @@ public class GameCanvas extends Canvas {
     }
 
     public void draw() {
-        // NAJPIERW czarne tło
         canvas.setFill(Paint.valueOf("black"));
         canvas.fillRect(0, 0, getWidth(), getHeight());
 
-        // POTEM cegły na czarnym tle
         for (Brick brick : bricks) {
             brick.draw(canvas);
         }
+
+        if (hpSystem != null) {
+            hpSystem.draw(canvas);
+        }
+    }
+
+    public void setHPSystem(HpSystem hpSystem) {
+        this.hpSystem = hpSystem;
     }
 
     public void setPaddle(Paddle paddle) {
@@ -62,17 +69,15 @@ public class GameCanvas extends Canvas {
                 Color.BEIGE
         );
 
-        // Naprawiłem też kolejność parametrów w konstruktorze Brick
         for (int row = 2; row <= 7; row++) {
             Color color = rowColors.get(row - 2);
             for (int col = 0; col < cols; col++) {
-                Brick brick = new Brick(col, row, color, rows, cols); // poprawiona kolejność
+                Brick brick = new Brick(col, row, color, rows, cols);
                 bricks.add(brick);
             }
         }
     }
 
-    // Dodaję getter dla cegieł - przyda się do kolizji
     public List<Brick> getBricks() {
         return bricks;
     }

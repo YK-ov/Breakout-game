@@ -16,6 +16,7 @@ public class Main extends Application {
     private Paddle paddle;
     private GameCanvas canvas;
     private AnimationTimer gameLoop;
+    private HpSystem hpSystem;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -26,6 +27,8 @@ public class Main extends Application {
         GraphicsItem.setCanvasHeight(canvas.getHeight());
 
         canvas.loadLevel();
+        hpSystem = new HpSystem(3);
+        canvas.setHPSystem(hpSystem);
 
         paddle = new Paddle();
         canvas.setPaddle(paddle);
@@ -96,13 +99,17 @@ public class Main extends Application {
 
         checkWallCollisions();
         checkPaddleCollision();
-        checkBrickCollisions(); // Nowa metoda!
+        checkBrickCollisions();
 
-        // Reset piłki gdy spadnie na dół
         if (ball.getY() > canvas.getHeight()) {
             ball.setPosition(new Point2D(960, 540));
             double angle = Math.toRadians(45);
             ball.setMoveVector(new Point2D(Math.cos(angle), -Math.sin(angle)));
+
+            hpSystem.decreaseHp();
+            if (hpSystem.getHp() <= 0) {
+                gameLoop.stop();
+            }
         }
     }
 
@@ -129,40 +136,32 @@ public class Main extends Application {
                 ball.getY() < paddle.getY() + paddle.getHeight() &&
                 ball.getY() + ball.getHeight() > paddle.getY()) {
 
-            // Ustaw pozycję piłki nad paletką
             ball.setY(paddle.getY() - ball.getHeight());
 
-            // Oblicz pozycję uderzenia względem środka paletki
             double paddleCenter = paddle.getX() + paddle.getWidth() / 2;
             double ballCenter = ball.getX() + ball.getWidth() / 2;
             double hitPosition = (ballCenter - paddleCenter) / (paddle.getWidth() / 2);
 
-            // Używamy nowej metody bounceFromPaddle
             ball.bounceFromPaddle(hitPosition);
         }
     }
 
-    // Nowa metoda sprawdzająca kolizje z cegłami
     private void checkBrickCollisions() {
         Iterator<Brick> brickIterator = canvas.getBricks().iterator();
 
         while (brickIterator.hasNext()) {
             Brick brick = brickIterator.next();
 
-            // Pobieramy skrajne punkty piłki
             Point2D topPoint = ball.getTopPoint();
             Point2D bottomPoint = ball.getBottomPoint();
             Point2D leftPoint = ball.getLeftPoint();
             Point2D rightPoint = ball.getRightPoint();
 
-            // Sprawdzamy kolizję
             Brick.CrushType crushType = brick.checkCollision(topPoint, bottomPoint, leftPoint, rightPoint);
 
             if (crushType != Brick.CrushType.NoCrush) {
-                // Usuwamy cegłę
                 brickIterator.remove();
 
-                // Odbijamy piłkę w odpowiednim kierunku
                 switch (crushType) {
                     case HorizontalCrush:
                         ball.bounceHorizontal();
@@ -172,7 +171,6 @@ public class Main extends Application {
                         break;
                 }
 
-                // Przerwij sprawdzanie po pierwszej kolizji
                 break;
             }
         }

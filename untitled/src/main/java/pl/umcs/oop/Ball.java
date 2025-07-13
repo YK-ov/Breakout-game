@@ -12,7 +12,7 @@ public class Ball extends GraphicsItem {
         this.width = 20.0;
         this.height = 20.0;
 
-        double angle = Math.toRadians(-45);
+        double angle = Math.toRadians(-45); //-45
         this.moveVector = new Point2D(Math.cos(angle), Math.sin(angle));
         this.velocity = 15.0;
     }
@@ -57,7 +57,6 @@ public class Ball extends GraphicsItem {
         this.moveVector = new Point2D(moveVector.getX(), -moveVector.getY());
     }
 
-    // Krok 7: Metody zwracające skrajne punkty piłki
     public Point2D getTopPoint() {
         return new Point2D(this.x + this.width / 2, this.y);
     }
@@ -74,20 +73,14 @@ public class Ball extends GraphicsItem {
         return new Point2D(this.x + this.width, this.y + this.height / 2);
     }
 
-    // Krok 8: Odbicie od paletki z modyfikacją kąta
     public void bounceFromPaddle(double hitPosition) {
-        // hitPosition: -1.0 (lewy koniec) do 1.0 (prawy koniec)
-        // Ograniczamy wartość do bezpiecznego zakresu
         hitPosition = Math.max(-1.0, Math.min(1.0, hitPosition));
 
-        // Obliczamy kąt na podstawie pozycji uderzenia
-        // Maksymalny kąt to 60 stopni (PI/3 radianów)
-        double maxAngle = Math.PI / 3; // 60 stopni
+        double maxAngle = Math.PI / 3;
         double angle = hitPosition * maxAngle;
 
-        // Nowy wektor ruchu - zawsze w górę (ujemny Y)
         double newX = Math.sin(angle);
-        double newY = -Math.abs(Math.cos(angle)); // zawsze ujemny (w górę)
+        double newY = -Math.abs(Math.cos(angle));
 
         this.moveVector = new Point2D(newX, newY).normalize();
     }
