@@ -14,6 +14,9 @@ public class GameCanvas extends Canvas {
     private Paddle paddle;
     private List<Brick> bricks = new ArrayList<>();
     private HpSystem hpSystem;
+    private Runnable onRestart;
+    private Runnable onExit;
+    private boolean showPaddle;
 
     public GameCanvas(double width, double height) {
         super(width, height);
@@ -24,7 +27,25 @@ public class GameCanvas extends Canvas {
                 paddle.setPositionByMouseX(event.getX());
                 redraw();
             }
+
         });
+
+        this.setOnMouseClicked(event -> {  if (hpSystem != null && hpSystem.getHp() <= 0) {
+            double x = event.getX();
+            double y = event.getY();
+
+            if (hpSystem.getYesButtonBounds().contains(x, y)) {
+                if (onRestart != null) {
+                    onRestart.run();
+                }
+            }
+            else if (hpSystem.getExitButtonBounds().contains(x, y)) {
+                if (onExit != null) {
+                    onExit.run();
+                }
+            }
+        }});
+
     }
 
     public void draw() {
@@ -35,9 +56,22 @@ public class GameCanvas extends Canvas {
             brick.draw(canvas);
         }
 
-        if (hpSystem != null) {
+        if (hpSystem != null && hpSystem.getHp() > 0) {
             hpSystem.draw(canvas);
         }
+
+        if (hpSystem != null && hpSystem.hp == 0){
+            bricks.clear();
+            canvas.setFill(Paint.valueOf("black"));
+            hpSystem.drawGameOver(canvas);
+            paddle.setPositionByMouseX(2000);
+            //paddle.drawGameOver(canvas);
+        }
+
+        if (hpSystem != null && hpSystem.getHp() > 0 && paddle != null && showPaddle) {
+            paddle.draw(canvas);
+        }
+
     }
 
     public void setHPSystem(HpSystem hpSystem) {
@@ -50,9 +84,6 @@ public class GameCanvas extends Canvas {
 
     public void redraw() {
         draw();
-        if (paddle != null) {
-            paddle.draw(canvas);
-        }
     }
 
     public void loadLevel() {
@@ -83,5 +114,29 @@ public class GameCanvas extends Canvas {
 
     public List<Brick> getBricks() {
         return bricks;
+    }
+
+    public void setOnRestart(Runnable onRestart) {
+        this.onRestart = onRestart;
+    }
+
+    public void setOnExit(Runnable onExit) {
+        this.onExit = onExit;
+    }
+
+    public Runnable getOnRestart() {
+        return onRestart;
+    }
+
+    public Runnable getOnExit() {
+        return onExit;
+    }
+
+    public void setShowPaddle(boolean showPaddle) {
+        this.showPaddle = showPaddle;
+    }
+
+    public boolean isShowPaddle() {
+        return showPaddle;
     }
 }

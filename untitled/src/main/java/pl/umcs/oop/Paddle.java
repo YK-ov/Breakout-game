@@ -12,6 +12,12 @@ public class Paddle extends GraphicsItem {
         this.y = canvasHeight - 100;
     }
 
+    public void drawGameOver(GraphicsContext gc) {
+        gc.setFill(Paint.valueOf("black"));
+        gc.fillRect(this.x, this.y, this.width, this.height);
+
+    }
+
     @Override
     public void draw(GraphicsContext gc) {
         gc.setFill(Paint.valueOf("blue"));

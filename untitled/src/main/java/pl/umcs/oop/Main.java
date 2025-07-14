@@ -30,6 +30,20 @@ public class Main extends Application {
         hpSystem = new HpSystem(3);
         canvas.setHPSystem(hpSystem);
 
+        canvas.setOnRestart(() -> {
+            hpSystem.resetHp();
+            canvas.loadLevel();
+            ball.setPosition(new Point2D(960, 540));
+            double angle = Math.toRadians(45);
+            ball.setMoveVector(new Point2D(Math.cos(angle), -Math.sin(angle)));
+            paddle.setPosition(new Point2D(canvas.getWidth() / 2 - paddle.getWidth() / 2, paddle.getY()));
+            canvas.setShowPaddle(true);
+            canvas.redraw();
+            startGameLoop();
+        });
+
+        canvas.setOnExit(() -> {System.exit(0);});
+
         paddle = new Paddle();
         canvas.setPaddle(paddle);
 
@@ -46,6 +60,7 @@ public class Main extends Application {
         setupKeyboardControls(scene);
 
         startGameLoop();
+
 
         stage.setScene(scene);
         stage.show();
@@ -101,16 +116,35 @@ public class Main extends Application {
         checkPaddleCollision();
         checkBrickCollisions();
 
+        if (canvas.getBricks().size() == 0 && hpSystem.getHp() > 0) {
+            canvas.loadLevel();
+        }
+
         if (ball.getY() > canvas.getHeight()) {
             ball.setPosition(new Point2D(960, 540));
             double angle = Math.toRadians(45);
             ball.setMoveVector(new Point2D(Math.cos(angle), -Math.sin(angle)));
 
             hpSystem.decreaseHp();
+
             if (hpSystem.getHp() <= 0) {
                 gameLoop.stop();
-            }
+
+                //resetGame();
+                }
         }
+
+
+        }
+
+
+    public void resetGame(){
+        hpSystem.resetHp();
+        canvas.loadLevel();
+        ball.setPosition(new Point2D(960, 540));
+        double angle = Math.toRadians(45);
+        ball.setMoveVector(new Point2D(Math.cos(angle), -Math.sin(angle))); // w górę
+        paddle.setPosition(new Point2D(canvas.getWidth() / 2 - paddle.getWidth() / 2, paddle.getY()));
     }
 
     private void checkWallCollisions() {
